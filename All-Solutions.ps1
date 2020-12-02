@@ -1,0 +1,1 @@
+﻿& $PSScriptRoot\Day1-Solution.ps1
