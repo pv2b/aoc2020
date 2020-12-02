@@ -55,20 +55,25 @@ $ValueList = @(Get-Content $PSScriptRoot\Day1-Input.txt | % { [int]$_ })
 # Create a HashSet with all of the values.
 $ValueSet = [System.Collections.Generic.HashSet[int]]$ValueList
 
-# Find the value n in $Input where 2020-n also exists in the input.
+function Solve {
+    Param([int]$ExpectedSum)
+    # Find the value n in $Input where 2020-n also exists in the input.
 
-$Results = @($ValueList | Where { $ValueSet.Contains(2020 - $_) })
+    $Results = @($ValueList | Where { $ValueSet.Contains($ExpectedSum - $_) })
 
-if ($Results.Count -ne 2) {
-    throw "Expected 2 results, actually got $($Results.Count) solutions!"
+    if ($Results.Count -ne 2) {
+        throw "Expected 2 results, actually got $($Results.Count) solutions!"
+    }
+
+    # At this point, we have two results, each of them complementary to each other,
+    # so we multiply them together, and there's our result!
+    $Results[0] * $Results[1]
 }
 
-# At this point, we have two results, each of them complementary to each other,
-# so we multiply them together, and there's our result!
-
-$Solution = $Results[0] * $Results[1]
+$Part1 = Solve -ExpectedSum 2020
 
 [pscustomobject]@{
     Day      = 1
-    Solution = $Solution
+    Part1    = $Part1
+#    Part2    = $Part2
 }
