@@ -48,6 +48,25 @@ sum to 2020; what do you get if you multiply them together?
 # This will be done in O(n) time, because lookup and insertions intoa
 # HashSet is done in O(1) time.
 
+<#
+--- Part Two ---
+
+The Elves in accounting are thankful for your help; one of them even offers
+you a starfish coin they had left over from a past vacation. They offer you
+a second one if you can find three numbers in your expense report that meet
+the same criteria.
+
+Using the above example again, the three entries that sum to 2020 are 979,
+366, and 675. Multiplying them together produces the answer, 241861950.
+
+In your expense report, what is the product of the three entries that sum
+to 2020?
+#>
+
+# Oh dear, for part two, I had to completely re-think this. First of all,
+# I refactored my code into being recursive. Second, to avoid duplicate
+# solutions, I added a constraint saying the terms have to be in
+# ascending order.
 
 # Read the numbers from the file, making sure to parse them as integers.
 $ValueList = @(Get-Content $PSScriptRoot\Day1-Input.txt | % { [int]$_ })
@@ -56,24 +75,48 @@ $ValueList = @(Get-Content $PSScriptRoot\Day1-Input.txt | % { [int]$_ })
 $ValueSet = [System.Collections.Generic.HashSet[int]]$ValueList
 
 function Solve {
-    Param([int]$ExpectedSum)
-    # Find the value n in $Input where 2020-n also exists in the input.
+    Param(
+    # The sum we're expecting to see
+    [Parameter(Mandatory=$true)][int]$ExpectedSum,
 
-    $Results = @($ValueList | Where { $ValueSet.Contains($ExpectedSum - $_) })
+    # The numbers of terms we want
+    [Parameter(Mandatory=$true)][int]$Terms,
+    
+    # The minimum allowable term. (This ensures we're getting unique
+    # solutions by enforcing they need to be in ascending order.)
+    [Parameter(Mandatory=$false)]$MinTerm = 1
+    )
 
-    if ($Results.Count -ne 2) {
-        throw "Expected 2 results, actually got $($Results.Count) solutions!"
+    if ($Terms -eq 1) {
+        if ($ExpectedSum -ge $MinTerm -and $ValueSet.Contains($ExpectedSum)) {
+            $ExpectedSum
+        } else {
+            throw "No solution found!"
+        }
+    } elseif ($Terms -gt 1) {
+        $Results = @($ValueSet | Sort-Object | Where { $_ -lt $ExpectedSum -and $_ -ge $MinTerm } | Foreach-Object {
+            $ValueSet.Remove($_) | Out-Null
+            try {
+                (Solve -ExpectedSum ($ExpectedSum - $_) -Terms ($Terms - 1) -MinTerm ($_ + 1)) * $_
+            } catch {}
+            $ValueSet.Add($_) | Out-Null
+        })
+
+        if ($Results.Count -ne 1) {
+            throw "Expected 1 results, actually got $($Results.Count) results!"
+        }
+
+        $Results
+    } else {
+        throw "Terms must be >= 1! (Is $Terms)"
     }
-
-    # At this point, we have two results, each of them complementary to each other,
-    # so we multiply them together, and there's our result!
-    $Results[0] * $Results[1]
 }
 
-$Part1 = Solve -ExpectedSum 2020
+$Part1 = Solve -ExpectedSum 2020 -Terms 2
+$Part2 = Solve -ExpectedSum 2020 -Terms 3
 
 [pscustomobject]@{
-    Day      = 1
-    Part1    = $Part1
-#    Part2    = $Part2
+    Day   = 1
+    Part1 = $Part1
+    Part2 = $Part2
 }
