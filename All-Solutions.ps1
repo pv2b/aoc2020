@@ -1,1 +1,3 @@
-﻿& $PSScriptRoot\Day1-Solution.ps1
+﻿foreach ($n in 1..2) {
+    & "$PSScriptRoot\Day$n-Solution.ps1"
+}
