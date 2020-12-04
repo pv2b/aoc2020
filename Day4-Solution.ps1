@@ -15,7 +15,7 @@
     $Passport
 }
 
-function Get-ValidPassport {
+function Select-ValidPassport {
     Param(
         [Parameter(Mandatory=$true, ValueFromPipeline=$true)]$Passport,
         [Parameter(Mandatory=$false)][switch]$ExtendedValidation
@@ -84,8 +84,8 @@ function Get-ValidPassport {
     }
 }
 
-$ValidPassports = Get-Passport | Get-ValidPassport
-$ValidPassports2 = $ValidPassports | Get-ValidPassport -ExtendedValidation
+$ValidPassports = Get-Passport | Select-ValidPassport
+$ValidPassports2 = $ValidPassports | Select-ValidPassport -ExtendedValidation
 
 $Part1 = ($ValidPassports | Measure-Object).Count
 $Part2 = ($ValidPassports2 | Measure-Object).Count
