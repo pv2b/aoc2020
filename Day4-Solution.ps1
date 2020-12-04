@@ -17,7 +17,8 @@
 
 function Get-ValidPassport {
     Param(
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]$Passport
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]$Passport,
+        [Parameter(Mandatory=$false)][switch]$ExtendedValidation
     )
 
     Process {
@@ -25,22 +26,14 @@ function Get-ValidPassport {
         $Valid = $true
         foreach ($Key in $KeysToCheck) {
             if (-not ($Passport | Get-Member -Name $Key)) {
-                $Valid = $false
-                break
+                return
             }
         }
-        if ($Valid) {
-            $Passport
+        
+        if (-not $ExtendedValidation) {
+            return $Passport
         }
-    }
-}
 
-function Get-ValidPassport2 {
-    Param(
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]$Passport
-    )
-
-    Process {
         [int]$byr = $_.byr
         if (($byr -lt 1920) -or ($byr -gt 2002)) {
             return
@@ -55,6 +48,7 @@ function Get-ValidPassport2 {
         if (($eyr -lt 2020) -or ($eyr -gt 2030)) {
             return
         }
+
         if ($_.hgt -match "^(\d+)(cm|in)") {
             [int]$height = $matches[1]
             $unit = $matches[2]
@@ -85,13 +79,13 @@ function Get-ValidPassport2 {
         if ($_.pid -notmatch '^[0-9]{9}$') {
             return
         }
-
+        
         $Passport
     }
 }
 
 $ValidPassports = Get-Passport | Get-ValidPassport
-$ValidPassports2 = $ValidPassports | Get-ValidPassport2
+$ValidPassports2 = $ValidPassports | Get-ValidPassport -ExtendedValidation
 
 $Part1 = ($ValidPassports | Measure-Object).Count
 $Part2 = ($ValidPassports2 | Measure-Object).Count
