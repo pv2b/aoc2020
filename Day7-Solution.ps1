@@ -13,22 +13,24 @@ Select-String -Path $PSScriptRoot\Day7-Input.txt -AllMatches "^(.+) bags contain
 $CanContainMemo = @{}
 function CanContain {
     Param($Container, $DesiredContent)
+
     $MemoKey = "$Container $DesiredContent"
-    if ($CanContainMemo.ContainsKey($MemoKey)) { return $CanContainMemo[$MemoKey] }
 
-    if ($BagRules[$Container].ContainsKey($DesiredContent)) {
-        $CanContainMemo[$MemoKey] = $true
-        return $true
-    }
-
-    foreach ($ContainedContainer in $BagRules[$Container].Keys) {
-        if (CanContain $ContainedContainer $DesiredContent) {
+    if (-not $CanContainMemo.ContainsKey($MemoKey)) {
+        if ($BagRules[$Container].ContainsKey($DesiredContent)) {
             $CanContainMemo[$MemoKey] = $true
-            return $true
+        } else {
+            $CanContainMemo[$MemoKey] = $false
+            foreach ($ContainedContainer in $BagRules[$Container].Keys) {
+                if (CanContain $ContainedContainer $DesiredContent) {
+                    $CanContainMemo[$MemoKey] = $true
+                    break
+                }
+            }
         }
     }
-    $CanContainMemo[$MemoKey] = $false
-    return $false
+
+    return $CanContainMemo[$MemoKey]
 }
 
 $ContainsCountMemo = @{}
