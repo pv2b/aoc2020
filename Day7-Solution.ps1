@@ -10,23 +10,36 @@ Select-String -Path $PSScriptRoot\Day7-Input.txt -AllMatches "^(.+) bags contain
     $BagRules[$Container] = $Contents
 }
 
+$CanContainMemo = @{}
 function CanContain {
     Param($Container, $DesiredContent)
-    if ($BagRules[$Container].ContainsKey($DesiredContent)) { return $true }
+    $MemoKey = "$Container $DesiredContent"
+    if ($CanContainMemo.ContainsKey($MemoKey)) { return $CanContainMemo[$MemoKey] }
+
+    if ($BagRules[$Container].ContainsKey($DesiredContent)) {
+        $CanContainMemo[$MemoKey] = $true
+        return $true
+    }
 
     foreach ($ContainedContainer in $BagRules[$Container].Keys) {
         if (CanContain $ContainedContainer $DesiredContent) {
+            $CanContainMemo[$MemoKey] = $true
             return $true
         }
     }
+    $CanContainMemo[$MemoKey] = $false
     return $false
 }
 
+$ContainsCountMemo = @{}
 function ContainsCount {
     Param($Container)
-    ($BagRules[$Container].GetEnumerator() | % {
-        $_.Value * (1 + (ContainsCount $_.Name))
-    } | Measure-Object -Sum).Sum
+    if (-not $ContainsCountMemo.ContainsKey($Container)) {
+        $ContainsCountMemo[$Container] = ($BagRules[$Container].GetEnumerator() | % {
+            $_.Value * (1 + (ContainsCount $_.Name))
+        } | Measure-Object -Sum).Sum
+    }
+    return $ContainsCountMemo[$Container]
 }
 
 $Part1 = ($BagRules.Keys | Where { CanContain $_ "shiny gold" } | Measure-Object).Count
