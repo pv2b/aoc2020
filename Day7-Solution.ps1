@@ -1,16 +1,14 @@
 ﻿$BagRules = @{}
-Get-Content $PSScriptRoot\Day7-Input.txt | `
-    Select-String -AllMatches "^(.+) bags contain (?:(?:|(?:(\d+ \w+ \w+) bags?)(?:, |.))+|no other bags.)$" | `
-    Foreach-Object {
-        $g = $_.Matches.Groups
-        $Container = $g[1].Value
-        $Contents = @{}
-        foreach ($Content in $g[2].Captures.Value) {
-            $Count, $Type = $Content -split ' ', 2
-            $Contents[$Type] = [int]$Count
-        }
-        $BagRules[$Container] = $Contents
+Select-String -Path $PSScriptRoot\Day7-Input.txt -AllMatches "^(.+) bags contain (?:(?:|(?:(\d+ \w+ \w+) bags?)(?:, |.))+|no other bags.)$" | % {
+    $g = $_.Matches.Groups
+    $Container = $g[1].Value
+    $Contents = @{}
+    foreach ($Content in $g[2].Captures.Value) {
+        $Count, $Type = $Content -split ' ', 2
+        $Contents[$Type] = [int]$Count
     }
+    $BagRules[$Container] = $Contents
+}
 
 function CanContain {
     Param($Container, $DesiredContent)
