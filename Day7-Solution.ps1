@@ -1,5 +1,5 @@
 ﻿$BagRules = @{}
-Select-String -Path $PSScriptRoot\Day7-Input.txt -AllMatches "^(.+) bags contain (?:(?:|(?:(\d+ .+?) bags?)(?:, |.))+|no other bags.)$" | % {
+Select-String -Path $PSScriptRoot\Day7-Input.txt -AllMatches "^(.+) bags contain (?:(?:(?:(\d+ .+?) bags?)(?:, |.))+|no other bags.)$" | % {
     $g = $_.Matches.Groups
     $Container = $g[1].Value
     $Contents = @{}
